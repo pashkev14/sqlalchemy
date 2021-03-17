@@ -9,18 +9,16 @@
         <title>{{ title }}</title>
     </head>
     <body>
-        <header>
+        <div class="alert alert-secondary" role="alert">
+            <h1>Миссия Колонизация Марса</h1>
             {% if current_user.is_authenticated %}
-                <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+                <a class="navbar-brand" href="/logout">{{ current_user.surname }} {{ current_user.name }}</a>
             {% else %}
                 <p>
                     <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
                     <a class="btn btn-success" href="/login">Войти</a>
                 </p>
             {% endif %}
-        </header>
-        <div class="alert alert-secondary" role="alert">
-            <h1>Миссия Колонизация Марса</h1>
         </div>
         <h4>И на Марсе будут яблони цвести!</h4>
         <main role="main" class="container">
