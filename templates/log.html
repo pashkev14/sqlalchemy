@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link rel="stylesheet" href={{ css }}>
+    <h2>Works log</h2>
+    {% for item in jobs %}
+        <h4 style="color: #000000;">Action № {{ loop.index }}</h4>
+        <div class="container">
+          <div class="row">
+            <div class="col-md">
+              Title of activity
+            </div>
+            <div class="col-md">
+              Team leader
+            </div>
+            <div class="col-md">
+              Duration
+            </div>
+            <div class="col-md">
+              List of collaborators
+            </div>
+            <div class="col-md">
+              Is finished
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm">
+                {{ item.job }}
+            </div>
+            <div class="col-sm">
+                {{ item.team_lead.surname }} {{ item.team_lead.name }}
+            </div>
+            <div class="col-sm">
+                {{ item.work_size }} hours
+            </div>
+            <div class="col-sm">
+                {{ item.collaborators }}
+            </div>
+                {% if item.is_finished %}
+                  <div class="col-sm">
+                      Is finished
+                  </div>
+                {% else %}
+                  <div class="col-sm" style="background-color: #de00ff47;">
+                      Is not finished
+                  </div>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+{% endblock %}
