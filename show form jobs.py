@@ -29,6 +29,7 @@ def base():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    css = url_for('static', filename='css/base.css')
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -39,22 +40,23 @@ def login():
         return render_template('login.html',
                                message="Неправильный логин или пароль",
                                form=form)
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template('login.html', title='Авторизация', form=form, css=css)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
+    css = url_for('static', filename='css/base.css')
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
             return render_template('register.html', title='Регистрация',
                                    form=form,
-                                   message="Пароли не совпадают")
+                                   message="Пароли не совпадают", css=css)
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация',
                                    form=form,
-                                   message="Такой пользователь уже есть")
+                                   message="Такой пользователь уже есть", css=css)
         user = User()
         user.surname = form.surname.data
         user.name = form.name.data
@@ -67,7 +69,7 @@ def reqister():
         db_sess.add(user)
         db_sess.commit()
         return redirect('/login')
-    return render_template('register.html', title='Регистрация', form=form)
+    return render_template('register.html', title='Регистрация', form=form, css=css)
 
 
 @app.route('/log')
@@ -83,6 +85,7 @@ def show_db():
 @app.route('/addjob',  methods=['GET', 'POST'])
 @login_required
 def add_job():
+    css = url_for('static', filename='css/base.css')
     form = AddJobForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -95,7 +98,7 @@ def add_job():
         db_sess.add(job)
         db_sess.commit()
         return redirect('/log')
-    return render_template('addjob.html', form=form)
+    return render_template('addjob.html', form=form, css=css)
 
 
 @app.route('/logout')
