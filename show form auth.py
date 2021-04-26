@@ -75,7 +75,7 @@ def show_db():
     db_sess = db_session.create_session()
     jobs = db_sess.query(Jobs)
     css = url_for('static', filename='css/base.css')
-    return render_template("log.html", css=css, jobs=jobs)
+    return render_template("index.html", css=css, jobs=jobs)
 
 
 @app.route('/logout')

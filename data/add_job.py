@@ -8,5 +8,5 @@ class AddJobForm(FlaskForm):
     work_size = StringField('Объем работы')
     collaborators = StringField('ID участников')
     is_finished = BooleanField('Работа закончена')
-    submit = SubmitField('Добавить')
+    submit = SubmitField('Добавить/Изменить')
 

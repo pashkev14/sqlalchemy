@@ -1,5 +1,6 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 from data import db_session
 from data.add_job import AddJobForm
@@ -22,9 +23,11 @@ def load_user(user_id):
 
 @app.route('/')
 def base():
-    if current_user.is_authenticated:
-        return redirect('/log')
-    return render_template('base.html')
+    db_session.global_init("db/jobs.db")
+    db_sess = db_session.create_session()
+    jobs = db_sess.query(Jobs)
+    css = url_for('static', filename='css/base.css')
+    return render_template("index.html", css=css, jobs=jobs)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -36,10 +39,10 @@ def login():
         user = db_sess.query(User).filter(User.email == form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            return redirect("/log")
+            return redirect("/")
         return render_template('login.html',
                                message="Неправильный логин или пароль",
-                               form=form)
+                               form=form, css=css)
     return render_template('login.html', title='Авторизация', form=form, css=css)
 
 
@@ -72,16 +75,6 @@ def reqister():
     return render_template('register.html', title='Регистрация', form=form, css=css)
 
 
-@app.route('/log')
-@login_required
-def show_db():
-    db_session.global_init("db/jobs.db")
-    db_sess = db_session.create_session()
-    jobs = db_sess.query(Jobs)
-    css = url_for('static', filename='css/base.css')
-    return render_template("index.html", css=css, jobs=jobs)
-
-
 @app.route('/addjob',  methods=['GET', 'POST'])
 @login_required
 def add_job():
@@ -97,8 +90,57 @@ def add_job():
         job.is_finished = form.is_finished.data
         db_sess.add(job)
         db_sess.commit()
-        return redirect('/log')
-    return render_template('addjob.html', form=form, css=css)
+        return redirect('/')
+    return render_template('addjob.html', form=form, css=css, title='Добавление работы')
+
+
+@app.route('/editjob/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(id):
+    css = url_for('static', filename='css/base.css')
+    form = AddJobForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        jobs = db_sess.query(Jobs).filter(Jobs.id == id,
+                                         ((Jobs.team_lead == current_user) | (current_user.id == 1))).first()
+        if jobs:
+            form.job.data = jobs.job
+            form.team_leader.data = jobs.team_leader
+            form.work_size.data = jobs.work_size
+            form.collaborators.data = jobs.collaborators
+            form.is_finished.data = jobs.is_finished
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                         ((Jobs.team_lead == current_user) | (current_user.id == 1))).first()
+        if job:
+            job.job = form.job.data
+            job.team_leader = form.team_leader.data
+            job.collaborators = form.collaborators.data
+            job.work_size = form.work_size.data
+            job.is_finished = form.is_finished.data
+            db_sess.add(job)
+            db_sess.commit()
+            return redirect('/')
+        else:
+            abort(404)
+    return render_template('addjob.html', form=form, css=css, title='Изменение работы')
+
+
+@app.route('/deljob/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_job(id):
+    session = db_session.create_session()
+    job = session.query(Jobs).filter(Jobs.id == id,
+                                     ((Jobs.team_lead == current_user) | (current_user.id == 1))).first()
+    if job:
+        session.delete(job)
+        session.commit()
+    else:
+        abort(404)
+    return redirect('/')
 
 
 @app.route('/logout')
