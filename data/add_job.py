@@ -9,4 +9,3 @@ class AddJobForm(FlaskForm):
     collaborators = StringField('ID участников')
     is_finished = BooleanField('Работа закончена')
     submit = SubmitField('Добавить/Изменить')
-

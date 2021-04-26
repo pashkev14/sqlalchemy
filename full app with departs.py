@@ -4,6 +4,7 @@ from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 from data import db_session
 from data.add_job import AddJobForm
+from data.add_depart import AddDepartForm
 from data.log import LoginForm
 from data.__all_models import *
 from data.reg import RegisterForm
@@ -161,68 +162,66 @@ def delete_job(id):
 @login_required
 def add_depart():
     css = url_for('static', filename='css/base.css')
-    form = AddJobForm()
+    form = AddDepartForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        job = Jobs()
-        job.job = form.job.data
-        job.team_leader = form.team_leader.data
-        job.work_size = form.work_size.data
-        job.collaborators = form.collaborators.data
-        job.is_finished = form.is_finished.data
-        db_sess.add(job)
+        depart = Department()
+        depart.title = form.title.data
+        depart.chief = form.chief.data
+        depart.members = form.members.data
+        depart.email = form.email.data
+        db_sess.add(depart)
         db_sess.commit()
-        return redirect('/jobs')
-    return render_template('addjob.html', form=form, css=css, title='Добавление работы')
+        return redirect('/departments')
+    return render_template('adddepart.html', form=form, css=css, title='Добавление департамента')
 
 
 @app.route('/editdepart/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit_job(id):
+def edit_depart(id):
     css = url_for('static', filename='css/base.css')
-    form = AddJobForm()
+    form = AddDepartForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        jobs = db_sess.query(Jobs).filter(Jobs.id == id,
-                                         ((Jobs.team_lead == current_user) | (current_user.id == 1))).first()
-        if jobs:
-            form.job.data = jobs.job
-            form.team_leader.data = jobs.team_leader
-            form.work_size.data = jobs.work_size
-            form.collaborators.data = jobs.collaborators
-            form.is_finished.data = jobs.is_finished
+        departs = db_sess.query(Department).filter(Department.id == id,
+                                         ((Department.chief_user == current_user) | (current_user.id == 1))).first()
+        if departs:
+            form.title.data = departs.title
+            form.chief.data = departs.chief
+            form.members.data = departs.members
+            form.email.data = departs.email
         else:
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                         ((Jobs.team_lead == current_user) | (current_user.id == 1))).first()
-        if job:
-            job.job = form.job.data
-            job.team_leader = form.team_leader.data
-            job.collaborators = form.collaborators.data
-            job.work_size = form.work_size.data
-            job.is_finished = form.is_finished.data
-            db_sess.add(job)
+        depart = db_sess.query(Department).filter(Department.id == id,
+                                         ((Department.chief_user == current_user) | (current_user.id == 1))).first()
+        if depart:
+            depart.title = form.title.data
+            depart.chief = form.chief.data
+            depart.members = form.members.data
+            depart.email = form.email.data
+            db_sess.add(depart)
             db_sess.commit()
             return redirect('/departments')
         else:
             abort(404)
-    return render_template('addjob.html', form=form, css=css, title='Изменение работы')
+    return render_template('adddepart.html', form=form, css=css, title='Изменение департамента')
 
 
-@app.route('/deljob/<int:id>', methods=['GET', 'POST'])
+@app.route('/deldepart/<int:id>', methods=['GET', 'POST'])
 @login_required
-def delete_job(id):
+def delete_depart(id):
     session = db_session.create_session()
-    job = session.query(Jobs).filter(Jobs.id == id,
-                                     ((Jobs.team_lead == current_user) | (current_user.id == 1))).first()
-    if job:
-        session.delete(job)
+    depart = session.query(Department).filter(Department.id == id,
+                                     ((Department.chief_user == current_user) | (current_user.id == 1))).first()
+    if depart:
+        session.delete(depart)
         session.commit()
     else:
         abort(404)
-    return redirect('/jobs')
+    return redirect('/departments')
+
 
 @app.route('/logout')
 @login_required

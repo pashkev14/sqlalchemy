@@ -10,33 +10,35 @@
     {% for item in departs %}
         <h4 style="color: #000000;">Department № {{ loop.index }}</h4>
         <div class="container">
-          <div class="row">
-            <div class="col-md">
-              Title of department
+              <div class="row">
+                  <div class="col-md">
+                      Title of department
+                  </div>
+                  <div class="col-md">
+                      Chief
+                  </div>
+                  <div class="col-md">
+                      Members
+                  </div>
+                  <div class="col-md">
+                      Department email
+                  </div>
+              </div>
+            <div class="row">
+              <div class="col-sm">
+                {{ item.title }}
+              </div>
+              <div class="col-sm">
+                {{ item.chief_user.surname }} {{ item.chief_user.name }}
+              </div>
+              <div class="col-sm">
+                {{ item.members }}
+              </div>
+                <div class="col-sm">
+                    {{ item.email }}
+                </div>
             </div>
-            <div class="col-md">
-              Chief
-            </div>
-            <div class="col-md">
-              Members
-            </div>
-            <div class="col-md">
-              Department email
-            </div>
-            <div class="col-md">
-              Is finished
-            </div>
-          </div>
-          <div class="col-sm">
-            {{ item.title }}
-          </div>
-          <div class="col-sm">
-            {{ item.chief_user.surname }} {{ item.chief_user.name }}
-          </div>
-          <div class="col-sm">
-            {{ item.members }}
-          </div>
-          {% if current_user.is_authenticated and current_user == item.team_lead or current_user.id == 1 %}
+          {% if current_user.is_authenticated and current_user == item.chief_user or current_user.id == 1 %}
           <div>
             <a href="/editdepart/{{ item.id }}" class="btn btn-warning">
               Изменить
